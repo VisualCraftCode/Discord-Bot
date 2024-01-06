@@ -4,7 +4,6 @@ import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import org.apache.commons.collections4.properties.PropertiesFactory;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -19,25 +18,28 @@ import java.util.Properties;
  */
 public class DiscordBot {
 
-    public static final DiscordBot INSTANCE;
+    public static final DiscordBot INSTANCE = new DiscordBot();
 
-    static {
+    @Getter
+    private final Properties settings = new Properties();
+
+    @Getter
+    private final JDA jda;
+
+    private DiscordBot() {
+
         try {
-            INSTANCE = new DiscordBot();
+            settings.load(DiscordBot.class.getClassLoader().getResourceAsStream("settings.properties"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        this.jda = JDABuilder.createDefault(settings.getProperty("token"))
+                .setActivity(Activity.playing("VisualCraftCode"))
+                .build();
     }
 
-    private DiscordBot() throws IOException {}
 
-    @Getter
-    private final Properties settings = PropertiesFactory.INSTANCE.load(DiscordBot.class.getResourceAsStream("settings.properties"));
-
-    @Getter
-    private final JDA jda = JDABuilder.createDefault(settings.getProperty("token"))
-            .setActivity(Activity.playing("VisualCraftCode"))
-            .build();
 
 
     public static void main(String[] args) throws InterruptedException {
