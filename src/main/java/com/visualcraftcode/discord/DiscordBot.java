@@ -1,9 +1,12 @@
 package com.visualcraftcode.discord;
 
+import com.visualcraftcode.discord.listeners.ReadyListener;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -26,6 +29,14 @@ public class DiscordBot {
     @Getter
     private final JDA jda;
 
+    /*
+        TODO List
+
+        [] Support (Ticket System, decide between support and bug report)
+        [x] Information sending
+
+     */
+
     private DiscordBot() {
 
         try {
@@ -34,8 +45,10 @@ public class DiscordBot {
             throw new RuntimeException(e);
         }
 
-        this.jda = JDABuilder.createDefault(settings.getProperty("token"))
+        this.jda = JDABuilder.createDefault(settings.getProperty("token"), GatewayIntent.MESSAGE_CONTENT)
                 .setActivity(Activity.playing("VisualCraftCode"))
+                .addEventListeners(new ReadyListener())
+                .disableCache(CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS, CacheFlag.VOICE_STATE)
                 .build();
     }
 
