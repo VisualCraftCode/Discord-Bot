@@ -5,9 +5,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.internal.interactions.component.ButtonImpl;
 
 import java.awt.*;
 import java.util.List;
@@ -27,7 +31,28 @@ public class ReadyListener implements EventListener {
     public void onEvent(GenericEvent event) {
         if(event instanceof ReadyEvent) {
             sendInfos();
+            sendSupport();
         }
+    }
+
+    private void sendSupport() {
+        TextChannel channel = DiscordBot.INSTANCE.getJda().getTextChannelById(DiscordBot.INSTANCE.getSettings().getProperty("support_channel_id"));
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("VisualCraftCode - Support/Bugs");
+        builder.setColor(Color.CYAN);
+        builder.setImage("https://media.discordapp.net/attachments/1193212050416074855/1193475973753090089/VisualCraftCode_Discord_Banner_Support.png?ex=65acda1d&is=659a651d&hm=d4439f8e936cf0eb477333a834da2a4d9f68086d130abc3eb7ce030081f06c20&=&format=webp&quality=lossless&width=490&height=148");
+
+        MessageCreateBuilder messageBuilder = new MessageCreateBuilder();
+        messageBuilder.setEmbeds(builder.build());
+        messageBuilder.setActionRow(new ButtonImpl("ticket.create", "Create ticket", ButtonStyle.PRIMARY, false, Emoji.fromUnicode("U+1F4C4")),
+                new ButtonImpl("bug.create", "Report bug", ButtonStyle.PRIMARY, false, Emoji.fromUnicode("U+1F4EB")));
+
+        //Clear Channel
+        for (Message message : channel.getIterableHistory()) {
+            message.delete().queue();
+        }
+
+        channel.sendMessage(messageBuilder.build()).queue();
     }
 
     private void sendInfos() {
